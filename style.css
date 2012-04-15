@@ -1,0 +1,65 @@
+/* pict-lang css */
+
+body {
+	padding: 40px;
+}
+
+div#container {
+	border: #ddd solid 1px;
+	background-color: #ddf;
+	display: none;
+}
+div#canvas-container {
+	background-color: #fff;
+}
+
+canvas#canvas {
+	background-color: #fff;
+	border: black solid 1px;
+	margin: 10px;
+	padding: 0px;
+	float: left;
+}
+textarea#output {
+	margin: 10px;
+	padding: 0px;
+	clear: right;
+}
+textarea#command {
+	margin: 10px;
+	padding: 0px;
+	clear: left;
+	float:left;
+}
+#command_area {
+	clear: left;
+}
+#command_area h3 {
+	margin: 5px;
+	padding: 0;
+}
+form#controller {
+	padding: 10px;
+	margin: 0px;
+	float:left;
+}
+#container .dummy {
+	clear: both;
+}
+ul.controls {
+	list-style-type: none;
+	padding: 0px;
+	margin: 0px;
+}
+ul.controls li {
+	padding: 5px 0px;
+	margin: 0px;
+}
+form#controller p {
+	margin: 5px 0px;
+	padding: 0;
+	clear: both;
+}
+h2 {
+	clear: left;
+}

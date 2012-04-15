@@ -1,0 +1,277 @@
+<html>
+	<head>
+		<title>図形言語(Picture Language) on browser</title>
+		<link rel="stylesheet" type="text/css" media="all" href="./style.css" />
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<script src="./prototype.js" type="text/javascript"></script>
+		<script src="./gin.js" type="text/javascript"></script>
+		<script src="./todescheme.js" type="text/javascript"></script>
+		<script src="./todescheme.scm" type="text/todescheme"></script>
+		<script src="./pict-lang.js" type="text/javascript"></script>
+		<script src="./pict-lang.scm" type="text/todescheme"></script>
+	</head>
+	<body>
+		<h1>図形言語 On Browser</h1>
+		<p>SICP 2.2.4の図形言語(picture language)をブラウザ上に実装したものです。</p>
+		<p>Opera 9.27,Firefox 2.0.0.14にてテストしました。残念ながらIEでは動きません。</p>
+		<p>Firefoxの場合ロード中に固まりますが、仕様です。Scheme処理系の速度はそう速くないため、高速なマシンが必要かもしれません。</p>
+		<h2></h2>
+		<p id="start"><strong><a href="javascript:void(0)" onclick="start()" >開始する</a>(重いよ)</strong></p>
+		<div id="container">
+			<div id="canvas-container">
+				<p>Canvas size: <a href="javascript:void(0)" onclick="resize_canvas(200)">200x200</a> | <a href="javascript:void(0)" onclick="resize_canvas(300)">300x300</a> | <a href="javascript:void(0)" onclick="resize_canvas(400)">400x400</a> | <a href="javascript:void(0)" onclick="resize_canvas(canvas_size-50);">-</a> <a href="javascript:void(0)" onclick="resize_canvas(canvas_size+50);">+</a></p>
+				<canvas id="canvas" width="400" height="400"></canvas>
+			</div>
+			<textarea id="output" rows="18" cols="50" wrap="soft"></textarea>
+			<div id="command_area">
+				<h3>Command:</h3>
+				<textarea rows="13" cols="50" id="command" wrap="soft">(draw (corner-split (multi-colored-painter wave) 2))</textarea>
+				<form target="" id="controller">
+					<ul class="controls">
+						<li> <input type="checkbox" id="opt_holdlog"/><label for="opt_holdlog">hold output log</label> </li>
+						<li> <input type="checkbox" id="opt_autoclear" checked="1"/><label for="opt_autoclear">Auto clear</label></li>
+						<li> <input type="button" id="button_clr" name="clr" value="clear canvas" onClick="clearCanvas()" /> </li>
+						<li> <input type="button" id="button_exec" name="exec" value="exec(ctrl-enter)" onClick="doEval()"/> </li>
+					</ul>
+					<p>command history: 
+					<a href="javascript:void(0)" onClick="historyPrev()">prev(ctrl-left)</a>
+					<a href="javascript:void(0)" onclick="historyNext()">next(ctrl-right)</a>
+					</p>
+				</form>
+			</div>
+			<div class="dummy"></div>
+		</div>
+		<h2> Examples </h2>
+		<pre>
+; だいたいSICPのサンプルに準じてるはずです
+
+; 基本要素
+(draw wave)
+(draw triangle)
+
+; 変形
+(draw (flip-vert triangle))
+(draw (flip-horiz wave))
+
+; 合成
+(draw (beside wave triangle))
+(draw (below wave triangle))
+
+; 繰り返し
+(draw (corner-split wave 4))
+(draw (right-split wave 4))
+
+; 色
+(draw (red-painter wave))
+
+(draw (green-painter wave))
+
+(draw (blue-painter wave))
+
+(draw (colored-painter wave (rgb 128 100 200)))
+
+(draw (corner-split (multi-colored-painter wave) 4) ; 描画のたび､red,blue,greenを交互に使う
+
+; 組み合わせ
+(draw (corner-split (multi-colored-painter wave) 2))
+</pre>
+		<p>定義されている関数の詳細については､<a href="./pict-lang.scm">図形言語ソース(scheme)</a>､を参照ください｡</p>
+		<h2>操作</h2>
+		<dl>
+			<dt>Ctrl-Enter</dt>
+			<dd>実行</dd>
+			<dt>Ctrl-Left</dt>
+			<dd>コマンドヒストリ戻る</dd>
+			<dt>Ctrl-Right</dt>
+			<dd>コマンドヒストリ進む</dd>
+		</dl>
+		<p>エラーメッセージが見にくいですが、がんばってください</p>
+		<h2>説明</h2>
+		<p>ブラウザ上で動かせる図形言語です。javascriptによるScheme処理系を使用して実装しています。描画にはCanvas要素を使用。</p>
+		<p> draw手続きを使うことでペインターを描画できます。</p>
+		<p> 定義されているペインターはwave、triangleの二種類(あと合成図形としてwave2、wave4も)。
+		残念ながら画像をペインターにすることはまだできません(変形処理がめんどう。Canvasの能力的にはじゅうぶん可能だが)。</p>
+		<p> 定義されている操作は(corner|up|right-split painter n), (flipped-pairs painter), (squash-inwards painter) など。
+		もちろん自分で新しい操作/ペインターを定義することが可能です。
+		詳細は<a href="./pict-lang.scm">ソース</a>参照のこと。</p>
+		<h2>ソース</h2>
+		<ul>
+			<li><a href="./todescheme.js">Scheme処理系本体(js)</a></li>
+			<li><a href="./pict-lang.scm">図形言語ソース(scheme)</a></li>
+			<li><a href="./pict-lang.js">図形言語ソース(js)</a></li>
+		</ul>
+		<h2>使用ライブラリ</h2>
+		<ul>
+			<li><a href="http://nanto.asablo.jp/blog/2007/09/12/1793275">gin</a>(パーサライブラリ)</li>
+			<li><a href="http://www.prototypejs.org/">prototype.js</a></li>
+			<li><a href="http://d.hatena.ne.jp/gnarl/20070925/1190715464">todescheme</a>(Scheme処理系)(自作)</li>
+		</ul>
+		<h2>つくったひと</h2>
+		<p><a href="http://d.hatena.ne.jp/gnarl/">id:gnarl</a></p>
+		<p>説明エントリ:<a href="http://d.hatena.ne.jp/gnarl/20080516/1210932895">SICP 2.2.4の図形言語をブラウザ上に実装してみた</a></p>
+		<script type="text/javascript">
+//汚いソースだなあ……
+//ライブラリのロード、UIまわりの雑多なことをしている
+
+//loading animation generated with http://www.ajaxload.info/
+// and encoded with http://www.kawa.net/works/js/data-scheme/base64.html
+var LOADING_IMAGE = 'data:image/gif;base64,'+
+    'R0lGODlhEAAQAPIAAP///wAAAMLCwkJCQgAAAGJiYoKCgpKSkiH+GkNyZWF0ZWQgd2l0aCBhamF4'+
+    'bG9hZC5pbmZvACH5BAAKAAAAIf8LTkVUU0NBUEUyLjADAQAAACwAAAAAEAAQAAADMwi63P4wyklr'+
+    'E2MIOggZnAdOmGYJRbExwroUmcG2LmDEwnHQLVsYOd2mBzkYDAdKa+dIAAAh+QQACgABACwAAAAA'+
+    'EAAQAAADNAi63P5OjCEgG4QMu7DmikRxQlFUYDEZIGBMRVsaqHwctXXf7WEYB4Ag1xjihkMZsiUk'+
+    'KhIAIfkEAAoAAgAsAAAAABAAEAAAAzYIujIjK8pByJDMlFYvBoVjHA70GU7xSUJhmKtwHPAKzLO9'+
+    'HMaoKwJZ7Rf8AYPDDzKpZBqfvwQAIfkEAAoAAwAsAAAAABAAEAAAAzMIumIlK8oyhpHsnFZfhYum'+
+    'CYUhDAQxRIdhHBGqRoKw0R8DYlJd8z0fMDgsGo/IpHI5TAAAIfkEAAoABAAsAAAAABAAEAAAAzII'+
+    'unInK0rnZBTwGPNMgQwmdsNgXGJUlIWEuR5oWUIpz8pAEAMe6TwfwyYsGo/IpFKSAAAh+QQACgAF'+
+    'ACwAAAAAEAAQAAADMwi6IMKQORfjdOe82p4wGccc4CEuQradylesojEMBgsUc2G7sDX3lQGBMLAJ'+
+    'ibufbSlKAAAh+QQACgAGACwAAAAAEAAQAAADMgi63P7wCRHZnFVdmgHu2nFwlWCI3WGc3TSWhUFG'+
+    'xTAUkGCbtgENBMJAEJsxgMLWzpEAACH5BAAKAAcALAAAAAAQABAAAAMyCLrc/jDKSatlQtScKdce'+
+    'CAjDII7HcQ4EMTCpyrCuUBjCYRgHVtqlAiB1YhiCnlsRkAAAOwAAAAAAAAAAAA==';
+var logger={
+info: function(s){$('output').value+=s+'\n';},
+error: function(s){$('output').value+='**ERROR** '+ s+'\n';}
+}
+Scheme.Logger={info:function(){},error:logger.error};
+var env=new Environment(Scheme.getDefaultEnvironment());
+$('button_exec').disabled=true
+var start=function() {
+	$('start').innerHTML='<img src="'+LOADING_IMAGE+'" />ライブラリのロード中'
+	setTimeout(function(){
+		load_libs(env);
+		setTimeout(function() {
+			$('button_exec').disabled=false
+			$('start').innerHTML='ロード完了'
+			$('container').style.display='block';
+			Scheme.evaluate(Scheme.parse('(draw (corner-split (multi-colored-painter wave) 2))'),env)
+		},2000)
+	},100);
+}
+var load_libs=function(env) {
+	var progress=document.createElement('span');
+	$('start').appendChild(progress)
+	logger.info('loading libraries...')
+	$A(document.getElementsByTagName('script')).each(function(s) {
+		if(s.type=="text/todescheme") {
+			new Ajax.Request(s.src,{
+				method: 'get',
+				asynchronous: false,
+				onComplete:function(req) {
+					logger.info('loading: '+s.src);
+					var srcs=req.responseText.split(';;');
+					logger.info('total expressions: '+srcs.length);
+					var start=new Date();
+					srcs.each(function(src,index) {
+						try {
+							progress.innerHTML=' '+(index+1)+'/'+srcs.length
+							if(src[1]==';') return
+							var expr=Scheme.parse(src)
+							var ops=Scheme.compile(expr)
+							Scheme.run(ops,env)
+						} catch(e) {
+							logger.error(e)
+						}
+					})
+					var end=new Date();
+					logger.info('time: '+(end.getTime()-start.getTime())+'[ms]')
+				}
+			})
+		}
+	})
+	logger.info('loading additional primitive procs')
+	PictLang.bindProcs(env);
+	logger.info('done')
+}
+Scheme.evaluate(Scheme.parse('(define tak (lambda (x y z) (if (<= x y) y (tak (tak (- x 1) y z) (tak (- y 1) z x) (tak (- z 1) x y)))))'),env);
+env.bind('long-log',function(enabled){Scheme.Logger=enabled?logger:empty_logger});
+env.bind('to-string',function(obj){return obj.toString();});
+var current_canvas=$('canvas')
+var current_canvas_context=current_canvas.getContext('2d')
+var canvas_size=400;
+var resize_canvas=function(size) {
+	$('canvas-container').removeChild($('canvas'));
+	var c=document.createElement('canvas');
+	c.width=size;
+	c.height=size;
+	c.id='canvas';
+	$('canvas-container').appendChild(c);
+	current_canvas=c;
+	current_canvas_context=c.getContext('2d');
+	canvas_size=size;
+}
+env.bind('current-canvas',function(){return current_canvas});
+env.bind('current-canvas-context',function(){return current_canvas_context})
+function clrlog() {
+	$('output').value='';
+}
+env.bind('clear-log',clrlog)
+command_history=[]
+command_history_index=-1
+function showtime(desc,proc) {
+	var start=new Date().getTime();
+	var val=proc();
+	logger.info(desc+' time: '+(new Date().getTime()-start)+'[ms]');
+	return val;
+}
+function clearCanvas() {
+	Scheme.evaluate(Scheme.parse('(clear-canvas)'),env);
+}
+function doEval() {
+	if($('button_exec').disabled) return
+	if($F('opt_autoclear')) Scheme.evaluate(Scheme.parse('(clear-canvas)'),env);
+	command_history_index=-1
+		if(!$F('opt_holdlog')) clrlog();
+	var src=$('command').value;
+	var expr=showtime('parsing',function(){return Scheme.parse(src);})
+	if(!expr) {
+		logger.error('Parse error. expr '+src+' is not valid syntax');
+		return false
+	}
+	logger.info('evaluating '+Scheme.inspectSExpr(expr) +'...');
+	var result=void(0);
+	try {
+		var ops=showtime('compile',function(){return Scheme.compile(expr)});
+		logger.info('evaluating...')
+		result=showtime('evaluate',function(){return Scheme.run(ops,env);});
+	} catch(e) {
+		logger.info("Error: "+e.toString());
+		return false;
+	}
+	logger.info('result: '+Scheme.inspectSExpr(result));
+	if(result!==void(0)) { //success
+		if(command_history[command_history.length-1]!=src)
+			command_history.push(src)
+		$('command').value="";
+		env.bind('_',result);
+	}
+	return false;
+}
+function historyPrev() {
+	if(command_history.length <= command_history_index) return
+	command_history_index++
+	$('command').value=command_history[command_history.length-1-command_history_index]
+}
+function historyNext() {
+	if(command_history_index==0) {
+		$('command').value='';
+		return
+	}
+	command_history_index--
+	$('command').value=command_history[command_history.length-1-command_history_index]
+}
+$('command').focus();
+$('command').onkeypress=function(e) {
+	if(e.keyCode==Event.KEY_RETURN && e.ctrlKey) {
+		Event.stop(e);
+		doEval();
+	} else if(e.keyCode==Event.KEY_LEFT && e.ctrlKey) {
+		Event.stop(e);
+		historyPrev();
+	} else if(e.keyCode==Event.KEY_RIGHT && e.ctrlKey) {
+		Event.stop(e);
+		historyNext();
+	}
+}
+</script>
+	</body>
+</html>
